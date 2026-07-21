@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev Manuals - 開発・操作マニュアル集</title>
+    <meta name="description" content="自分用の開発ノウハウおよび操作手順をまとめたマニュアルポータルサイトです。">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">DEV <span>MANUALS</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html" class="active">HOME</a></li>
+                <li><a href="git_basic_usage.html">GIT / GITHUB</a></li>
+            </ul>
+            <div class="burger" aria-label="Menu Toggle">
+                <div class="line1"></div>
+                <div class="line2"></div>
+                <div class="line3"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="hero">
+        <div class="container">
+            <div class="hero-content reveal">
+                <h1>Dev Manual Archive</h1>
+                <p>個人用ナレッジ・コマンド手順・開発ワークフローを効率的に閲覧・管理するためのWEBマニュアルです。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Manual Catalog Section -->
+    <section id="manuals">
+        <div class="container">
+            <div class="section-title reveal">
+                <h2>Category Index</h2>
+            </div>
+            
+            <div class="manual-grid">
+                <!-- Card 1: GitHub Basic Usage -->
+                <a href="git_basic_usage.html" class="manual-card reveal">
+                    <span class="tag">Version Control</span>
+                    <h3>GitHub の基本操作</h3>
+                    <p>リポジトリ作成、clone、add/commit/push、ブランチ運用、競合解決までの必須フローと主要コマンド解説。</p>
+                    <div class="card-footer">
+                        閲覧する &rarr;
+                    </div>
+                </a>
+
+                <!-- Card 2: Placeholder for future manuals -->
+                <div class="manual-card reveal" style="opacity: 0.6; cursor: default;">
+                    <span class="tag">Upcoming</span>
+                    <h3>Docker & コンテナ構築</h3>
+                    <p>開発環境の標準化やDocker Composeを使ったローカル構築手順のメモ（準備中）。</p>
+                    <div class="card-footer" style="color: var(--text-muted);">
+                        準備中
+                    </div>
+                </div>
+
+                <!-- Card 3: Placeholder for future manuals -->
+                <div class="manual-card reveal" style="opacity: 0.6; cursor: default;">
+                    <span class="tag">Upcoming</span>
+                    <h3>GitHub Actions CI/CD</h3>
+                    <p>自動ビルド・デプロイパイプラインの構築手順とワークフロー定義の書き方（準備中）。</p>
+                    <div class="card-footer" style="color: var(--text-muted);">
+                        準備中
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Dev Manuals Archive. Built for GitHub Pages.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

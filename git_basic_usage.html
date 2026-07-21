@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub の基本操作 - Dev Manuals</title>
+    <meta name="description" content="GitHub/Gitの基本操作、clone, commit, push, branch操作のコマンドまとめマニュアル。">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">DEV <span>MANUALS</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="git_basic_usage.html" class="active">GIT / GITHUB</a></li>
+            </ul>
+            <div class="burger" aria-label="Menu Toggle">
+                <div class="line1"></div>
+                <div class="line2"></div>
+                <div class="line3"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="manual-layout">
+            
+            <!-- Sidebar (TOC) -->
+            <aside class="toc-sidebar">
+                <h4>目次</h4>
+                <ul>
+                    <li><a href="#overview">1. 概要・用語整理</a></li>
+                    <li><a href="#setup">2. リポジトリの準備</a></li>
+                    <li><a href="#daily-flow">3. 日常の開発フロー</a></li>
+                    <li><a href="#branch-ops">4. ブランチ運用</a></li>
+                    <li><a href="#trouble">5. よくあるトラブル解決</a></li>
+                </ul>
+            </aside>
+
+            <!-- Article Body -->
+            <main class="article-content">
+                <h1>GitHub の基本操作マニュアル</h1>
+                <div class="article-meta">
+                    カテゴリー: Version Control | 最終更新: 2026年7月21日
+                </div>
+
+                <section id="overview">
+                    <h2>1. 概要・用語整理</h2>
+                    <p>Gitは分散型バージョン管理システムであり、GitHubはそのコードをクラウド上で保存・共有するためのWebサービスです。</p>
+                    <ul>
+                        <li><strong>ローカルリポジトリ</strong>: 自分のPC内にある作業用リポジトリ</li>
+                        <li><strong>リモートリポジトリ</strong>: GitHub上にある共有リポジトリ（<code>origin</code>）</li>
+                        <li><strong>コミット (Commit)</strong>: ファイルの変更履歴を記録する単位</li>
+                        <li><strong>プッシュ (Push)</strong>: ローカルのコミットをGitHubに送信する操作</li>
+                        <li><strong>プル (Pull)</strong>: GitHubの最新状態をローカルに取得・統合する操作</li>
+                    </ul>
+                </section>
+
+                <section id="setup">
+                    <h2>2. リポジトリの準備</h2>
+                    <h3>既存リポジトリを自分のPCに複製（Clone）</h3>
+                    <p>GitHub上のプロジェクトをローカル環境にダウンロードします。</p>
+<pre><code># HTTPSでクローンする場合
+git clone https://github.com/username/repository-name.git
+
+# クローンしたディレクトリへ移動
+cd repository-name</code></pre>
+                </section>
+
+                <section id="daily-flow">
+                    <h2>3. 日常の開発フロー</h2>
+                    <p>基本となる「編集 &rarr; ステージング &rarr; コミット &rarr; プッシュ」の流れです。</p>
+
+                    <h3>1. 変更状態の確認</h3>
+                    <p>どのファイルが編集・追加されたか確認します。</p>
+<pre><code>git status</code></pre>
+
+                    <h3>2. ステージング（Indexへの追加）</h3>
+                    <p>コミット対象のファイルを選択します。</p>
+<pre><code># 特定のファイルをステージング
+git add path/to/file.ext
+
+# 変更された全ファイルをステージング
+git add .</code></pre>
+
+                    <h3>3. コミット（変更の記録）</h3>
+                    <p>分かりやすいコミットメッセージを添えて変更を記録します。</p>
+<pre><code>git commit -m "feat: 〇〇機能の追加"</code></pre>
+
+                    <h3>4. プッシュ（GitHubへの送信）</h3>
+<pre><code># mainブランチへ送信する場合
+git push origin main</code></pre>
+
+                    <div class="callout">
+                        <p><strong>Point:</strong> 作業前には必ず <code>git pull origin main</code> を実行して、リモートの最新状態を取り込んでから作業を始めましょう。</p>
+                    </div>
+                </section>
+
+                <section id="branch-ops">
+                    <h2>4. ブランチ運用</h2>
+                    <p>機能追加やバグ修正は、直接 <code>main</code> を編集せず専用のブランチを作成して作業します。</p>
+
+                    <h3>ブランチの作成と切り替え</h3>
+<pre><code># 新しいブランチを作成して切替
+git checkout -b feature/login-page
+
+# （Git 2.23以降の新しいコマンド表現）
+git switch -c feature/login-page</code></pre>
+
+                    <h3>ブランチ一覧の確認</h3>
+<pre><code>git branch -a</code></pre>
+
+                    <h3>作業完了後のプッシュ</h3>
+<pre><code>git push origin feature/login-page</code></pre>
+                    <p>プッシュ後、GitHub上で「Pull Request (PR)」を作成し、レビューを経て <code>main</code> ブランチへマージします。</p>
+                </section>
+
+                <section id="trouble">
+                    <h2>5. よくあるトラブル解決</h2>
+                    
+                    <h3>誤ってコミットメッセージを間違えた時</h3>
+<pre><code>git commit --amend -m "正しいコミットメッセージ"</code></pre>
+
+                    <h3>ローカルの直前の変更を取り消したい時</h3>
+<pre><code># ステージングを取り消す（ファイルの編集内容は保持）
+git restore --staged path/to/file
+
+# 編集内容自体を破棄して直前コミットに戻す
+git restore path/to/file</code></pre>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Dev Manuals Archive. Built for GitHub Pages.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

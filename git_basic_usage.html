@@ -39,104 +39,122 @@
                 <ul>
                     <li><a href="#overview">1. 概要・用語整理</a></li>
                     <li><a href="#setup">2. リポジトリの準備</a></li>
-                    <li><a href="#daily-flow">3. 日常の開発フロー</a></li>
-                    <li><a href="#branch-ops">4. ブランチ運用</a></li>
-                    <li><a href="#trouble">5. よくあるトラブル解決</a></li>
+                    <li><a href="#daily-flow">3. 日常のコマンド例</a></li>
+                    <li><a href="#branch-ops">4. ブランチ操作コマンド例</a></li>
+                    <li><a href="#trouble">5. トラブル解決コマンド例</a></li>
                 </ul>
             </aside>
 
             <!-- Article Body -->
             <main class="article-content">
-                <h1>GitHub の基本操作マニュアル</h1>
+                <h1>GitHub / Git コマンドリファレンス</h1>
                 <div class="article-meta">
-                    カテゴリー: Version Control | 最終更新: 2026年7月21日
+                    カテゴリー: Version Control | 最終更新: 2026年7月25日
                 </div>
 
                 <section id="overview">
                     <h2>1. 概要・用語整理</h2>
-                    <p>Gitは分散型バージョン管理システムであり、GitHubはそのコードをクラウド上で保存・共有するためのWebサービスです。</p>
+                    <p>Gitはファイルの変更履歴を記録するバージョン管理システムであり、GitHubはチームや個人でソースコードを共有・管理するためのWebサービスです。</p>
                     <ul>
                         <li><strong>ローカルリポジトリ</strong>: 自分のPC内にある作業用リポジトリ</li>
-                        <li><strong>リモートリポジトリ</strong>: GitHub上にある共有リポジトリ（<code>origin</code>）</li>
-                        <li><strong>コミット (Commit)</strong>: ファイルの変更履歴を記録する単位</li>
-                        <li><strong>プッシュ (Push)</strong>: ローカルのコミットをGitHubに送信する操作</li>
-                        <li><strong>プル (Pull)</strong>: GitHubの最新状態をローカルに取得・統合する操作</li>
+                        <li><strong>リモートリポジトリ</strong>: GitHub上にある共有リポジトリ（デフォルト名は <code>origin</code>）</li>
+                        <li><strong>コミット (Commit)</strong>: ファイルの変更履歴を保存する単位</li>
+                        <li><strong>プッシュ (Push)</strong>: ローカルのコミットをGitHubへ送信・反映する操作</li>
+                        <li><strong>プル (Pull)</strong>: GitHubの最新状態を取得し、ローカルに統合する操作</li>
                     </ul>
                 </section>
 
                 <section id="setup">
                     <h2>2. リポジトリの準備</h2>
-                    <h3>既存リポジトリを自分のPCに複製（Clone）</h3>
-                    <p>GitHub上のプロジェクトをローカル環境にダウンロードします。</p>
-<pre><code># HTTPSでクローンする場合
-git clone https://github.com/username/repository-name.git
+                    
+                    <h3>git clone <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（リポジトリの複製）</span></h3>
+                    <p>GitHub上の既存リポジトリをローカルPCにダウンロードして複製します。</p>
+<pre><code># 指定したURLのリポジトリをカレントディレクトリに複製
+git clone &lt;リポジトリのURL&gt;
 
-# クローンしたディレクトリへ移動
-cd repository-name</code></pre>
+# 現在のディレクトリ内に直接複製する場合（ディレクトリが空である必要があります）
+git clone &lt;リポジトリのURL&gt; .</code></pre>
                 </section>
 
                 <section id="daily-flow">
-                    <h2>3. 日常の開発フロー</h2>
-                    <p>基本となる「編集 &rarr; ステージング &rarr; コミット &rarr; プッシュ」の流れです。</p>
+                    <h2>3. 日常のコマンド例</h2>
 
-                    <h3>1. 変更状態の確認</h3>
-                    <p>どのファイルが編集・追加されたか確認します。</p>
+                    <h3>git status <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（状態確認）</span></h3>
+                    <p>現在編集されたファイルや、新規作成されて追跡されていないファイルの状態を確認します。</p>
 <pre><code>git status</code></pre>
 
-                    <h3>2. ステージング（Indexへの追加）</h3>
-                    <p>コミット対象のファイルを選択します。</p>
+                    <h3>git add <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（ステージング）</span></h3>
+                    <p>変更したファイルのうち、コミットに含めるものを選択（ステージ）します。</p>
 <pre><code># 特定のファイルをステージング
-git add path/to/file.ext
+git add path/to/file.html
 
-# 変更された全ファイルをステージング
+# 変更または新規作成されたすべてのファイルを一括でステージング
 git add .</code></pre>
 
-                    <h3>3. コミット（変更の記録）</h3>
-                    <p>分かりやすいコミットメッセージを添えて変更を記録します。</p>
+                    <h3>git commit <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（コミット）</span></h3>
+                    <p>ステージングされた変更に対してメッセージを付け、ローカルリポジトリに履歴として記録します。</p>
 <pre><code>git commit -m "feat: 〇〇機能の追加"</code></pre>
 
-                    <h3>4. プッシュ（GitHubへの送信）</h3>
-<pre><code># mainブランチへ送信する場合
+                    <h3>git pull <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（最新状態の取得・統合）</span></h3>
+                    <p>GitHub（リモートリポジトリ）の最新状態を取得し、現在作業中のローカルブランチに自動でマージ（統合）します。</p>
+<pre><code># originリモートの指定したブランチから最新状態を取得してマージ
+git pull origin &lt;ブランチ名&gt;
+
+# 例: mainブランチの最新状態を取り込む
+git pull origin main</code></pre>
+
+                    <h3>git push <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（リモートへの送信）</span></h3>
+                    <p>ローカルリポジトリで記録したコミットを、GitHub（リモートリポジトリ）に送信して反映します。</p>
+<pre><code># 指定したブランチへ変更を送信
+git push origin &lt;ブランチ名&gt;
+
+# 例: mainブランチにプッシュする
 git push origin main</code></pre>
 
                     <div class="callout">
-                        <p><strong>Point:</strong> 作業前には必ず <code>git pull origin main</code> を実行して、リモートの最新状態を取り込んでから作業を始めましょう。</p>
+                        <p><strong>注意:</strong> 他の人と共同開発を行っている場合は、作業前に必ず <code>git pull</code> を実行して最新のコードを取り込んでから開発を進めるようにしましょう。</p>
                     </div>
                 </section>
 
                 <section id="branch-ops">
-                    <h2>4. ブランチ運用</h2>
-                    <p>機能追加やバグ修正は、直接 <code>main</code> を編集せず専用のブランチを作成して作業します。</p>
+                    <h2>4. ブランチ操作コマンド例</h2>
 
-                    <h3>ブランチの作成と切り替え</h3>
-<pre><code># 新しいブランチを作成して切替
-git checkout -b feature/login-page
+                    <h3>git branch <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（ブランチの一覧・確認）</span></h3>
+                    <p>現在存在するローカルブランチおよびリモートブランチの一覧を確認します。</p>
+<pre><code># ローカルブランチの一覧を表示（現在選択されているブランチには * が付きます）
+git branch
 
-# （Git 2.23以降の新しいコマンド表現）
-git switch -c feature/login-page</code></pre>
+# リモートブランチを含むすべてのブランチを表示
+git branch -a</code></pre>
 
-                    <h3>ブランチ一覧の確認</h3>
-<pre><code>git branch -a</code></pre>
+                    <h3>git switch / git checkout <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（ブランチの切り替え・新規作成）</span></h3>
+                    <p>作業するブランチを切り替えます。または、新しくブランチを作成してそこに切り替えます。</p>
+<pre><code># 既存のブランチへ切り替える
+git switch &lt;ブランチ名&gt;
+# （従来のコマンド表記）
+git checkout &lt;ブランチ名&gt;
 
-                    <h3>作業完了後のプッシュ</h3>
-<pre><code>git push origin feature/login-page</code></pre>
-                    <p>プッシュ後、GitHub上で「Pull Request (PR)」を作成し、レビューを経て <code>main</code> ブランチへマージします。</p>
+# 新しいブランチを作成して、同時にそのブランチへ切り替える
+git switch -c &lt;新しいブランチ名&gt;
+# （従来のコマンド表記）
+git checkout -b &lt;新しいブランチ名&gt;</code></pre>
                 </section>
 
                 <section id="trouble">
-                    <h2>5. よくあるトラブル解決</h2>
-                    
-                    <h3>誤ってコミットメッセージを間違えた時</h3>
-<pre><code>git commit --amend -m "正しいコミットメッセージ"</code></pre>
+                    <h2>5. トラブル解決コマンド例</h2>
 
-                    <h3>ローカルの直前の変更を取り消したい時</h3>
-<pre><code># ステージングを取り消す（ファイルの編集内容は保持）
-git restore --staged path/to/file
+                    <h3>git commit --amend <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（直前コミットの修正）</span></h3>
+                    <p>直前に行ったコミットのメッセージを修正します。また、ステージングされた変更を直前のコミットに追加することもできます。</p>
+<pre><code>git commit --amend -m "修正後の正しいコミットメッセージ"</code></pre>
 
-# 編集内容自体を破棄して直前コミットに戻す
-git restore path/to/file</code></pre>
+                    <h3>git restore <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（変更の取り消し）</span></h3>
+                    <p>誤って変更してしまったファイルを元に戻したり、ステージングしたファイルを取り消したりします。</p>
+<pre><code># ステージングしたファイルを取り消す（ワークスペース内のファイルの編集内容は維持）
+git restore --staged &lt;ファイル名&gt;
+
+# ファイルの編集内容自体を破棄して、直前のコミット時の状態に戻す（元に戻せないので注意）
+git restore &lt;ファイル名&gt;</code></pre>
                 </section>
-
             </main>
         </div>
     </div>

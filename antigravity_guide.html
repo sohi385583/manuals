@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity IDE 操作・活用マニュアル - Dev Manuals</title>
+    <meta name="description" content="VS CodeベースのAI開発環境「Antigravity IDE」の基本機能、3つのAI操作モード、ショートカット、コードレンズ、スラッシュコマンドの操作マニュアル。">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">DEV <span>MANUALS</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="git_basic_usage.html">GIT / GITHUB</a></li>
+                <li><a href="antigravity_guide.html" class="active">ANTIGRAVITY IDE</a></li>
+            </ul>
+            <div class="burger" aria-label="Menu Toggle">
+                <div class="line1"></div>
+                <div class="line2"></div>
+                <div class="line3"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="manual-layout">
+            
+            <!-- Sidebar (TOC) -->
+            <aside class="toc-sidebar">
+                <h4>目次</h4>
+                <ul>
+                    <li><a href="#overview">1. Antigravity IDE 概要</a></li>
+                    <li><a href="#modalities">2. 3つのAI操作モード</a></li>
+                    <li><a href="#editor-integrations">3. エディタ統合機能</a></li>
+                    <li><a href="#shortcuts">4. ショートカットキー一覧</a></li>
+                    <li><a href="#commands-mentions">5. コマンドと@メンション</a></li>
+                    <li><a href="#project-config">6. プロジェクト設定と権限</a></li>
+                </ul>
+            </aside>
+
+            <!-- Article Body -->
+            <main class="article-content">
+                <h1>Antigravity IDE 操作・活用マニュアル</h1>
+                <div class="article-meta">
+                    カテゴリー: AI IDE & Editor | 最終更新: 2026年9月24日
+                </div>
+
+                <section id="overview">
+                    <h2>1. Antigravity IDE 概要</h2>
+                    <p><strong>Antigravity IDE</strong> は、VS Codeをベースに設計されたAIネイティブな統合開発環境です。エディタ内のキーストローク予測から、インラインでの部分リファクタリング、サイドバーでの自律型エージェントによるペアプログラミングまでが統合されています。</p>
+                    <ul>
+                        <li><strong>直感的な操作感</strong>: 普段のVS Codeと同じ拡張機能やキーバインドをそのまま維持。</li>
+                        <li><strong>シームレスなAI連携</strong>: コード補完だけでなく、コンパイルエラーの自動修復やテスト生成を1クリックで実行可能。</li>
+                        <li><strong>自律型ペアプログラミング</strong>: ファイル作成、修正、コマンド実行、ブラウザ検証までエージェントが自律的に対応。</li>
+                    </ul>
+                </section>
+
+                <section id="modalities">
+                    <h2>2. 3つのAI操作モード</h2>
+                    <p>Antigravity IDEでは、作業の粒度や目的に応じて3段階のAI操作モードをシームレスに使い分けます。</p>
+
+                    <h3>A. パッシブ: Antigravity Tab（補完・先回り予測）</h3>
+                    <p>タイピング中に次の一手を予測し、1ストロークでコードを反映します。</p>
+                    <ul>
+                        <li><strong>Autocomplete</strong>: カーソル位置の単語、行、コードブロックを文脈に合わせてリアルタイム補完。</li>
+                        <li><strong>Supercomplete</strong>: カーソル周辺の複数行にわたる削除・置換を含む差分（Diff）を提案。</li>
+                        <li><strong>Tab to Jump</strong>: 次に編集すべき関数・引数・変数へ <kbd>Tab</kbd> でカーソルをジャンプ移動。</li>
+                        <li><strong>Tab to Import</strong>: 未定義のモジュールや型を使用した際、ファイル先頭に必要な <code>import</code> 文を自動挿入。</li>
+                    </ul>
+
+                    <h3>B. 指示型: インラインコマンド (<kbd>⌘</kbd>+<kbd>I</kbd> / <kbd>Ctrl</kbd>+<kbd>I</kbd>)</h3>
+                    <p>エディタの選択箇所に対してピンポイントで指示を出し、部分的にコードを書き換えるモードです。</p>
+                    <ul>
+                        <li><strong>選択範囲のリファクタリング</strong>: 関数を選択して「TypeScriptの型安全性を高めて」「エラーハンドリングを追加して」と指示。</li>
+                        <li><strong>新規コード生成</strong>: 空行でショートカットを押し、「入力バリデーション用の正規表現関数を作成して」と指示。</li>
+                        <li><strong>ドキュメント・コメント作成</strong>: 複雑なロジックを選択して「JSDocコメントを生成して」と指示。</li>
+                    </ul>
+
+                    <h3>C. 協調型: サイドバーチャット &amp; 自律エージェント (<kbd>⌘</kbd>+<kbd>L</kbd> / <kbd>Ctrl</kbd>+<kbd>L</kbd>)</h3>
+                    <p>プロジェクト全体に関わる大規模な実装、機能追加、デバッグ、環境構築を対話形式で進めるモードです。</p>
+                    <ul>
+                        <li><strong>複数ファイルの一括編集</strong>: 関連するコンポーネント、スタイル、テストコードを横断して作成・修正。</li>
+                        <li><strong>ターミナルコマンド実行</strong>: ビルド、テスト、パッケージインストールをエージェントが自動または確認付きで実行。</li>
+                        <li><strong>ブラウザ動作確認</strong>: 作成したWEBページの画面崩れやエラーをエージェント自身が確認して修正。</li>
+                    </ul>
+                </section>
+
+                <section id="editor-integrations">
+                    <h2>3. エディタ統合機能</h2>
+                    <p>Antigravity IDEならではのエディタ連携機能により、日常のコーディングを加速します。</p>
+
+                    <h3>Inline Code Lenses（インラインコードレンズ）</h3>
+                    <p>クラスや関数、メソッドの定義行の上に、AIアクションボタンが直接表示されます。</p>
+                    <ul>
+                        <li><code>Refactor</code>: よりシンプルで堅牢なコードへのリファクタリングを即座に開始。</li>
+                        <li><code>Write Tests</code>: 選択した関数に対する単体テスト（Unit Test）を自動生成。</li>
+                        <li><code>Explain Code</code>: ロジックの処理意図やアルゴリズムの解説を表示。</li>
+                    </ul>
+
+                    <h3>Visual Diff Overlays（ビジュアル差分プレビュー）</h3>
+                    <p>AIが生成したコードは、エディタ上にインラインで赤（削除）と緑（追加）の差分としてプレビュー表示されます。内容を確認した上で、ワンクリックまたはショートカットで承認（Accept）または破棄（Reject）できます。</p>
+
+                    <h3>Diagnostic Auto-Fix（エラー自動修正）</h3>
+                    <p>TypeScriptのエラー、ESLintの警告、コンパイルエラー箇所に表示される電球アイコンや「Problems（問題）」パネルから、エージェントを直接呼び出して自動修正させることができます。</p>
+                </section>
+
+                <section id="shortcuts">
+                    <h2>4. ショートカットキー一覧</h2>
+                    <p>Antigravity IDEで頻繁に利用する主要キーボードショートカットです。</p>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>機能・操作</th>
+                                <th style="width: 35%;">macOS</th>
+                                <th style="width: 35%;">Windows / Linux</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>インライン編集を開く</strong></td>
+                                <td><kbd>⌘</kbd> + <kbd>I</kbd></td>
+                                <td><kbd>Ctrl</kbd> + <kbd>I</kbd></td>
+                            </tr>
+                            <tr>
+                                <td><strong>サイドバーチャットを開く/切替</strong></td>
+                                <td><kbd>⌘</kbd> + <kbd>L</kbd></td>
+                                <td><kbd>Ctrl</kbd> + <kbd>L</kbd></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tab補完の採用 (Accept)</strong></td>
+                                <td><kbd>Tab</kbd></td>
+                                <td><kbd>Tab</kbd></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tab補完の単語単位採用</strong></td>
+                                <td><kbd>⌘</kbd> + <kbd>→</kbd></td>
+                                <td><kbd>Ctrl</kbd> + <kbd>→</kbd></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tab補完・提案の破棄 (Reject)</strong></td>
+                                <td><kbd>Esc</kbd></td>
+                                <td><kbd>Esc</kbd></td>
+                            </tr>
+                            <tr>
+                                <td><strong>提案差分の全採用 (Accept All)</strong></td>
+                                <td><kbd>⌘</kbd> + <kbd>Enter</kbd></td>
+                                <td><kbd>Ctrl</kbd> + <kbd>Enter</kbd></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <section id="commands-mentions">
+                    <h2>5. コマンドと@メンション</h2>
+                    <p>サイドバーチャットで活用できるコマンドとコンテキスト指定方法です。</p>
+
+                    <h3>主要スラッシュコマンド (<code>/</code>)</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;">コマンド</th>
+                                <th>機能説明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>/plan</code></td>
+                                <td>実装前にファイル構成やステップごとの詳細計画を作成して確認します。</td>
+                            </tr>
+                            <tr>
+                                <td><code>/grill-me</code></td>
+                                <td>エージェントから設計意図や要件の確認質問を行い、仕様のブレを防ぎます。</td>
+                            </tr>
+                            <tr>
+                                <td><code>/learn</code></td>
+                                <td>解決したエラーやプロジェクト独自のルールを記憶させ、今後の開発に活かします。</td>
+                            </tr>
+                            <tr>
+                                <td><code>/goal</code></td>
+                                <td>タスク達成・テスト通過まで自律的に検証を繰り返す長時間実行指示です。</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>@メンションによるコンテキスト付与</h3>
+                    <ul>
+                        <li><code>@Files &amp; Folders</code>: 特定のファイルやディレクトリ（例: <code>@index.html</code>）を参照対象に指定。</li>
+                        <li><code>@Terminals</code>: ターミナルの直前のコマンド出力やエラーログをエージェントに読み込ませる。</li>
+                        <li><code>@Conversations</code>: 過去のチャットログを引き継いで作業を再開。</li>
+                        <li><code>@Rules</code> / <code>@Skills</code>: 定義済みのコーディング規約や手順書を明示的に適用。</li>
+                    </ul>
+                </section>
+
+                <section id="project-config">
+                    <h2>6. プロジェクト設定と権限</h2>
+                    <p>プロジェクトのルートディレクトリに設定を配置することで、エージェントの挙動をカスタマイズできます。</p>
+
+                    <h3>ワークスペース固有の設定 (<code>.agents/</code>)</h3>
+                    <ul>
+                        <li><strong><code>.agents/rules/</code></strong>:
+                            <p>「TailwindCSSは使わずVanilla CSSを使用する」「コミットメッセージはConventional Commitsに準拠する」などのコーディング規約を記述します。</p>
+                        </li>
+                        <li><strong><code>.agents/skills/</code></strong>:
+                            <p>「デプロイ手順」「APIクライアントの生成手順」など、繰り返し実行する定型ワークフローを定義します。</p>
+                        </li>
+                    </ul>
+
+                    <h3>ツール実行ポリシー（コマンド実行の承認設定）</h3>
+                    <p>IDEの設定（Settings）から、エージェントがコマンドを実行する際の挙動を制御できます：</p>
+                    <ul>
+                        <li><strong>request-review (推奨)</strong>: ターミナルコマンドを実行する前にユーザーに確認・承認を求めるモード。</li>
+                        <li><strong>always-proceed</strong>: コマンド実行を自動で進め、スピーディに開発を行うモード。</li>
+                        <li><strong>proceed-in-sandbox</strong>: サンドボックス環境で安全に自動実行するモード。</li>
+                    </ul>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Dev Manuals Archive. Built for GitHub Pages.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

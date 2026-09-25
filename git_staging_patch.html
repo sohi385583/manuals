@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Git ステージング・除外・パッチ管理ガイド (.gitignore / git patch) - Dev Manuals</title>
+    <meta name="description" content="Gitのステージング（インデックス）の詳細な仕組み、.gitignoreの書き方とキャッシュクリア、git add -p による部分ステージング、git diffの活用、パッチファイル(.patch)の作成と適用、git stashを網羅した実践マニュアル。">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">DEV <span>MANUALS</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="git_basic_usage.html">GIT / GITHUB</a></li>
+                <li><a href="git_staging_patch.html" class="active">STAGING & PATCH</a></li>
+                <li><a href="github_issue_pr.html">ISSUE & PR</a></li>
+                <li><a href="antigravity_guide.html">ANTIGRAVITY IDE</a></li>
+            </ul>
+            <div class="burger" aria-label="Menu Toggle">
+                <div class="line1"></div>
+                <div class="line2"></div>
+                <div class="line3"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="manual-layout">
+            
+            <!-- Sidebar (TOC) -->
+            <aside class="toc-sidebar">
+                <h4>目次</h4>
+                <ul>
+                    <li><a href="#overview">1. 3つの領域とステージング</a></li>
+                    <li><a href="#gitignore">2. .gitignore の設定と除外管理</a></li>
+                    <li><a href="#advanced-add">3. 部分ステージング (git add -p)</a></li>
+                    <li><a href="#diff-techniques">4. 差分確認 (git diff)</a></li>
+                    <li><a href="#patch-flow">5. パッチの作成と適用 (.patch)</a></li>
+                    <li><a href="#stash-flow">6. 作業の一時退避 (git stash)</a></li>
+                    <li><a href="#cheatsheet">7. コマンド早見表</a></li>
+                </ul>
+            </aside>
+
+            <!-- Article Body -->
+            <main class="article-content">
+                <h1>Git ステージング・除外・パッチ管理ガイド</h1>
+                <div class="article-meta">
+                    カテゴリー: Version Control (Advanced) | 最終更新: 2026年9月25日
+                </div>
+
+                <!-- Back / Related Link Banner -->
+                <a href="git_basic_usage.html" class="link-banner">
+                    <div class="link-banner-content">
+                        <h4>&larr; GitHub / Git 基本操作マニュアル</h4>
+                        <p>clone, commit, push, branch などの基礎コマンドはこちらをご確認ください。</p>
+                    </div>
+                    <span class="link-banner-arrow">&rarr;</span>
+                </a>
+
+                <p>日常の開発において、「とりあえず <code>git add .</code> して全部コミットする」運用だけでは、不要な設定ファイルやログの誤混入、巨大すぎるコミットによるコードレビューの難航、共同開発でのコンフリクトなどの問題に直面します。</p>
+                <p>本マニュアルでは、Gitの最大の特徴である<strong>「ステージング領域（インデックス）」</strong>の本質的な活用法、<strong><code>.gitignore</code> による安全な除外設計</strong>、そしてコード差分を柔軟に共有・適用できる<strong>パッチファイル（<code>.patch</code>）運用</strong>を詳しく解説します。</p>
+
+                <!-- SECTION 1 -->
+                <section id="overview">
+                    <h2>1. 3つの領域とステージングの仕組み</h2>
+                    <p>Gitは、ファイルを3つの異なるツリー（領域）で行き来させながら履歴を管理しています。</p>
+
+                    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px; padding: 1.5rem; margin: 1.5rem 0;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; text-align: center;">
+                            <div style="background: white; border: 1px solid var(--border-color); padding: 1rem; border-radius: 4px;">
+                                <div class="badge badge-soft" style="margin-bottom: 0.5rem;">領域 1</div>
+                                <h4 style="margin-bottom: 0.3rem;">作業ツリー (Working Tree)</h4>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;">エディタで実際に編集しているローカルのファイル群</p>
+                            </div>
+                            <div style="background: white; border: 2px solid var(--accent-strong); padding: 1rem; border-radius: 4px; box-shadow: 0 4px 10px rgba(176,37,60,0.08);">
+                                <div class="badge badge-primary" style="margin-bottom: 0.5rem;">領域 2: 中間バッファ</div>
+                                <h4 style="margin-bottom: 0.3rem;">ステージング (Index)</h4>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;"><code>git add</code> で選別された「次のコミットに入る変更」</p>
+                            </div>
+                            <div style="background: white; border: 1px solid var(--border-color); padding: 1rem; border-radius: 4px;">
+                                <div class="badge badge-soft" style="margin-bottom: 0.5rem;">領域 3</div>
+                                <h4 style="margin-bottom: 0.3rem;">リポジトリ (HEAD)</h4>
+                                <p style="font-size: 0.85rem; color: var(--text-muted); margin: 0;"><code>git commit</code> で確定した永続的なコミット履歴</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>なぜステージング領域が存在するのか？</h3>
+                    <ul>
+                        <li><strong>コミットの粒度を整える:</strong> 1日の中で複数の修正を行った場合でも、ファイルごと・行ごとにコミットを小分けにできます。</li>
+                        <li><strong>誤コミットの防止:</strong> 開発中の実験的コードや、APIキー・認証情報が入ったローカル設定（<code>.env</code>など）がコミットに混入するのを防ぎます。</li>
+                        <li><strong>変更のプレビュー:</strong> 「いまコミットしようとしている差分」だけを <code>git diff --staged</code> で厳密に検証できます。</li>
+                    </ul>
+
+                    <h3>ショートステータスで状態を一目で把握 (git status -s)</h3>
+                    <p><code>git status -s</code>（または <code>--short</code>）を実行すると、各ファイルのステージ状態が2文字のプレフィックスでコンパクトに表示されます。</p>
+<pre><code>$ git status -s
+M  src/index.js       # [左文字: M] ステージング済み（コミット対象）
+ M src/utils.js       # [右文字: M] 作業ツリーで変更されたが未ステージ
+MM src/app.js         # ステージング後、さらに作業ツリーで変更が加わった
+A  docs/readme.md     # 新規作成され、ステージング済み
+?? test/temp.txt      # 未追跡 (Untracked)</code></pre>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>表記</th>
+                                <th>左文字（ステージング状態）</th>
+                                <th>右文字（作業ツリー状態）</th>
+                                <th>意味</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>??</code></td>
+                                <td>未追跡</td>
+                                <td>未追跡</td>
+                                <td>Gitでまだ一度も管理されていない新規ファイル</td>
+                            </tr>
+                            <tr>
+                                <td><code>A </code></td>
+                                <td>追加済み (Added)</td>
+                                <td>変更なし</td>
+                                <td>新規追加され、ステージング完了している</td>
+                            </tr>
+                            <tr>
+                                <td><code>M </code></td>
+                                <td>変更済み (Modified)</td>
+                                <td>変更なし</td>
+                                <td>変更がステージング済み（コミット可能）</td>
+                            </tr>
+                            <tr>
+                                <td><code> M</code></td>
+                                <td>変更なし</td>
+                                <td>変更済み</td>
+                                <td>ファイルが編集されたが、まだステージングされていない</td>
+                            </tr>
+                            <tr>
+                                <td><code>MM</code></td>
+                                <td>変更済み</td>
+                                <td>変更済み</td>
+                                <td>ステージした後に、さらにファイルが編集された状態</td>
+                            </tr>
+                            <tr>
+                                <td><code>D </code></td>
+                                <td>削除済み (Deleted)</td>
+                                <td>変更なし</td>
+                                <td>ファイルの削除がステージング済み</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- SECTION 2 -->
+                <section id="gitignore">
+                    <h2>2. .gitignore の設定と除外管理</h2>
+                    <p><code>.gitignore</code> は、Gitに「このファイルやフォルダは追跡しないでください」と指示する設定ファイルです。プロジェクトのルートディレクトリに配置します。</p>
+
+                    <h3>パターンの書き方ルール</h3>
+                    <ul>
+                        <li><code>#</code> で始まる行はコメントとして無視されます。</li>
+                        <li><code>/</code> で始まるパスは、<code>.gitignore</code> ファイルがあるディレクトリからの相対パスを示します。</li>
+                        <li>末尾の <code>/</code> はディレクトリ（フォルダ全体）を指定します。</li>
+                        <li>先頭の <code>!</code> は、それまでの除外ルールを反転（除外から除外＝追跡対象に戻す）します。</li>
+                        <li>ワイルドカード（<code>*</code> は任意の文字列、<code>**</code> は任意のディレクトリ階層）が使えます。</li>
+                    </ul>
+
+                    <h3>代表的な .gitignore テンプレート例</h3>
+<pre><code># OS固有の一時ファイル
+.DS_Store
+Thumbs.db
+
+# ログファイル
+*.log
+npm-debug.log*
+yarn-debug.log*
+
+# 依存パッケージディレクトリ
+node_modules/
+vendor/
+
+# ビルド成果物・キャッシュ
+dist/
+build/
+.cache/
+*.pyc
+__pycache__/
+
+# 環境変数・認証情報（絶対にコミットしてはいけないファイル）
+.env
+.env.local
+.env.*.local
+*.pem
+secrets.json
+
+# エディタ・IDEの作業設定
+.idea/
+.vscode/settings.json
+*.swp</code></pre>
+
+                    <div class="callout">
+                        <p><strong>重要（頻出トラブル）: すでに追跡・コミット済みのファイルは .gitignore に書いても無視されない</strong><br>
+                        <code>.gitignore</code> が効果を発揮するのは<strong>未追跡 (Untracked)</strong> のファイルのみです。すでに過去のコミットに含まれているファイルは、追跡キャッシュをクリアする必要があります。</p>
+                    </div>
+
+                    <h3>キャッシュをクリアして .gitignore を反映させる手順</h3>
+<pre><code># 1. 特定のファイルだけ追跡を解除したい場合（作業ツリーの実ファイルは消えません）
+git rm --cached path/to/.env
+
+# 2. リポジトリ全体で .gitignore を再評価して追跡対象をリフレッシュする場合
+# （全ファイルのキャッシュを一旦外し、.gitignore に従い再追加する）
+git rm -r --cached .
+git add .
+git commit -m "chore: .gitignoreを適用し追跡対象から不要ファイルを除外"</code></pre>
+
+                    <h3>グローバルな除外設定 (すべてのリポジトリに適用)</h3>
+                    <p>macOSの <code>.DS_Store</code> や個人のエディタ設定など、すべてのリポジトリで共通して除外したいファイルは、グローバル設定を作成しておくと便利です。</p>
+<pre><code># グローバルignoreファイルのパスを指定
+git config --global core.excludesfile ~/.gitignore_global
+
+# ~/.gitignore_global に .DS_Store などを記述</code></pre>
+                </section>
+
+                <!-- SECTION 3 -->
+                <section id="advanced-add">
+                    <h2>3. 部分ステージング (git add -p) と取り消し</h2>
+                    <p>1つのファイル内で「バグ修正」と「新機能の実装」を同時に進めてしまった場合、ファイルごとコミットすると履歴が混ざってしまいます。<code>git add -p</code> を使うことで、<strong>変更の塊（ハンク / hunk）単位で選択的にステージング</strong>できます。</p>
+
+                    <h3>部分ステージングを実行する</h3>
+<pre><code>git add -p
+# または特定のファイルだけを対話形式でステージ
+git add -p src/main.js</code></pre>
+
+                    <p>コマンドを実行すると、変更箇所が1塊（hunk）ずつ表示され、末尾に次のようなプロンプトが現れます：</p>
+<pre><code>Stage this hunk [y,n,q,a,d,s,e,?]?</code></pre>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>キー</th>
+                                <th>名称</th>
+                                <th>動作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><kbd>y</kbd></td>
+                                <td>yes</td>
+                                <td>表示されているハンクを<strong>ステージングする</strong></td>
+                            </tr>
+                            <tr>
+                                <td><kbd>n</kbd></td>
+                                <td>no</td>
+                                <td>表示されているハンクを<strong>ステージングしない</strong>（スキップ）</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>s</kbd></td>
+                                <td>split</td>
+                                <td>ハンクが大きすぎる場合、<strong>さらに細かく分割</strong>する</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>e</kbd></td>
+                                <td>edit</td>
+                                <td>エディタを開き、行単位で手動編集してステージする内容を決める</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>q</kbd></td>
+                                <td>quit</td>
+                                <td>途中で対話モードを終了する（決定済みのステージ内容は維持される）</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>d</kbd></td>
+                                <td>do not stage</td>
+                                <td>このファイルのこれ以降のハンクをすべてステージしない</td>
+                            </tr>
+                            <tr>
+                                <td><kbd>?</kbd></td>
+                                <td>help</td>
+                                <td>利用可能なすべてのキーの説明を表示する</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>ステージングの安全な解除 (git restore --staged)</h3>
+                    <p>誤って <code>git add</code> してしまったファイルを、作業中の編集内容はそのままに、ステージング領域からだけ降ろします。</p>
+<pre><code># 特定のファイルのステージングを解除（作業ツリーの変更はそのまま残る）
+git restore --staged src/index.js
+
+# すべてのステージングを一括で解除
+git restore --staged .
+
+# ハンク単位で対話的にステージングを解除
+git restore --staged -p src/index.js</code></pre>
+                </section>
+
+                <!-- SECTION 4 -->
+                <section id="diff-techniques">
+                    <h2>4. 差分確認テクニック (git diff)</h2>
+                    <p>コミット前に「どこが変更されたか」を正確に把握することは、意図しないバグ混入を防ぐ最重要ステップです。Gitには比較対象に応じた3通りの <code>diff</code> コマンドがあります。</p>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>コマンド</th>
+                                <th>比較対象</th>
+                                <th>使いどころ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>git diff</code></td>
+                                <td><strong>作業ツリー</strong> vs <strong>ステージング</strong></td>
+                                <td>まだ <code>git add</code> していない編集内容を確認する</td>
+                            </tr>
+                            <tr>
+                                <td><code>git diff --staged</code><br><span style="font-size: 0.85em; color: var(--text-muted);">(または <code>--cached</code>)</span></td>
+                                <td><strong>ステージング</strong> vs <strong>HEAD (直前コミット)</strong></td>
+                                <td><strong>次の <code>git commit</code> で実際に記録される内容</strong>を最終確認する</td>
+                            </tr>
+                            <tr>
+                                <td><code>git diff HEAD</code></td>
+                                <td><strong>作業ツリー ＋ ステージング</strong> vs <strong>HEAD</strong></td>
+                                <td>直前のコミットから現在までに変更されたすべての内容を見る</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>よく使う diff オプション</h3>
+<pre><code># 変更のあったファイル名と変更行数のサマリーだけを表示
+git diff --stat
+
+# 単語単位での差分ハイライト（インライン変更を見やすくする）
+git diff --word-diff
+
+# 空白文字・改行コードの違いを無視して差分を表示
+git diff -w</code></pre>
+                </section>
+
+                <!-- SECTION 5 -->
+                <section id="patch-flow">
+                    <h2>5. パッチファイルの作成と適用 (.patch / git apply)</h2>
+                    <p><strong>パッチ（Patch）</strong>とは、Gitの差分情報をプレーンテキスト形式で保存したファイル（通常 <code>.patch</code> や <code>.diff</code> 拡張子）です。</p>
+                    
+                    <div class="callout">
+                        <p><strong>パッチが活躍する場面:</strong>
+                        <br>&bull; リモートリポジトリ（GitHubなど）へのプッシュ権限がない環境で、コード差分をメールやチャットで共有する
+                        <br>&bull; AIエージェントが作成した修正差分をローカル環境でレビュー・適用する
+                        <br>&bull; 本番サーバーに緊急ホットフィックスを適用する
+                        <br>&bull; ブランチを切り替えずに、別の環境へ変更内容を一時的に移送する</p>
+                    </div>
+
+                    <h3>1. パッチファイルを作成する</h3>
+
+                    <h4>A. 作業中の未ステージ差分をパッチにする</h4>
+<pre><code># 作業ツリーの未ステージ差分を patch ファイルに出力
+git diff > my_feature.patch
+
+# 特定のファイルだけの差分をパッチにする
+git diff path/to/file.js > file_fix.patch</code></pre>
+
+                    <h4>B. ステージング済みの差分をパッチにする</h4>
+<pre><code># git add 済みの内容だけをパッチファイルに出力
+git diff --staged > staged_changes.patch</code></pre>
+
+                    <h4>C. コミット履歴をパッチにする (git format-patch)</h4>
+                    <p><code>git format-patch</code> は、コミットメッセージ、作成者、日付などのコミット情報を含んだパッチを作成します。</p>
+<pre><code># 直近1件のコミットをパッチ化 (0001-commit-message.patch が生成される)
+git format-patch -1 HEAD
+
+# main ブランチと現在のブランチの差分コミットをすべてパッチ化
+git format-patch main</code></pre>
+
+                    <h3>2. パッチファイルを検証・適用する</h3>
+
+                    <h4>ステップ1: 事前チェック（ドライラン）</h4>
+                    <p>パッチを実際に適用する前に、エラーや競合（コンフリクト）が発生しないか検証できます。何も出力されなければ安全に適用可能です。</p>
+<pre><code># パッチが正常に適用可能かテスト（ファイルは変更されません）
+git apply --check my_feature.patch
+
+# パッチが影響を与えるファイルと行数を確認
+git apply --stat my_feature.patch</code></pre>
+
+                    <h4>ステップ2: パッチを適用する (git apply)</h4>
+<pre><code># パッチを適用して作業ツリーを変更
+git apply my_feature.patch</code></pre>
+
+                    <h4>ステップ3: format-patch 形式のパッチをコミットごと取り込む (git am)</h4>
+                    <p><code>git format-patch</code> で生成されたパッチは、<code>git am</code> コマンドを使うことで、元のコミットメッセージと作成者を保持したままコミットとして適用できます。</p>
+<pre><code># コミット履歴ごとパッチを適用
+git am < 0001-feature.patch</code></pre>
+
+                    <h4>競合が発生した場合の対処 (git apply --reject)</h4>
+                    <p>コードが一部衝突してパッチが当たらない場合、適用できる部分だけ適用し、衝突した箇所を <code>.rej</code> (reject) ファイルとして書き出すことができます。</p>
+<pre><code>git apply --reject my_feature.patch
+# 衝突したファイルに対応する .rej ファイルが生成されるので、手動で修正して解消します</code></pre>
+                </section>
+
+                <!-- SECTION 6 -->
+                <section id="stash-flow">
+                    <h2>6. 作業の一時退避 (git stash) とステージング</h2>
+                    <p>作業の途中で「急ぎで別のブランチのバグを直さなければならなくなった」とき、中途半端なコードをコミットすることなく、作業ツリーを一時的にクリーンにする機能が <code>git stash</code> です。</p>
+
+                    <h3>基本の退避と復元</h3>
+<pre><code># 現在の変更（未ステージ・ステージ済み）を一時退避
+git stash
+
+# メモ（メッセージ）を付けて退避
+git stash save "WIP: ユーザー一覧画面の実装途中"
+
+# 新規作成ファイル (Untracked) も含めてすべて退避
+git stash -u</code></pre>
+
+                    <h3>部分的に退避する (git stash -p)</h3>
+                    <p><code>git add -p</code> と同様に、対話形式で特定のハンクだけを選んで一時退避させることができます。</p>
+<pre><code>git stash -p</code></pre>
+
+                    <h3>退避した作業の確認と復元</h3>
+<pre><code># 退避したスタッシュの一覧を表示
+git stash list
+
+# スタッシュの中身の差分を確認
+git stash show -p stash@{0}
+
+# 最新の退避内容を復元し、スタッシュ一覧から削除する
+git stash pop
+
+# 最新の退避内容を復元するが、スタッシュ一覧には残しておく
+git stash apply
+
+# 特定のスタッシュを指定して復元
+git stash pop stash@{1}
+
+# 不要になったスタッシュを削除
+git stash drop stash@{0}
+
+# すべてのスタッシュを一括削除
+git stash clear</code></pre>
+                </section>
+
+                <!-- SECTION 7 -->
+                <section id="cheatsheet">
+                    <h2>7. コマンド早見表</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>用途</th>
+                                <th>コマンド</th>
+                                <th>説明</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>状態確認</td>
+                                <td><code>git status -s</code></td>
+                                <td>ステージ・作業ツリー状態を2文字略記で確認</td>
+                            </tr>
+                            <tr>
+                                <td>部分ステージ</td>
+                                <td><code>git add -p [ファイル]</code></td>
+                                <td>ハンク（ブロック）単位で選んでステージング</td>
+                            </tr>
+                            <tr>
+                                <td>ステージ解除</td>
+                                <td><code>git restore --staged [ファイル]</code></td>
+                                <td>作業内容は保持したままステージングを解除</td>
+                            </tr>
+                            <tr>
+                                <td>除外反映</td>
+                                <td><code>git rm --cached [ファイル]</code></td>
+                                <td>追跡を解除し <code>.gitignore</code> を有効化</td>
+                            </tr>
+                            <tr>
+                                <td>未ステージ差分</td>
+                                <td><code>git diff</code></td>
+                                <td>作業ツリー vs ステージング領域の差分</td>
+                            </tr>
+                            <tr>
+                                <td>ステージ差分</td>
+                                <td><code>git diff --staged</code></td>
+                                <td>ステージング領域 vs HEAD（次コミット内容）</td>
+                            </tr>
+                            <tr>
+                                <td>パッチ作成</td>
+                                <td><code>git diff > fix.patch</code></td>
+                                <td>未ステージの差分をパッチファイルに出力</td>
+                            </tr>
+                            <tr>
+                                <td>パッチテスト</td>
+                                <td><code>git apply --check fix.patch</code></td>
+                                <td>適用前にエラーや競合の有無をドライラン確認</td>
+                            </tr>
+                            <tr>
+                                <td>パッチ適用</td>
+                                <td><code>git apply fix.patch</code></td>
+                                <td>パッチの差を作業ツリーに反映</td>
+                            </tr>
+                            <tr>
+                                <td>一時退避</td>
+                                <td><code>git stash -u</code></td>
+                                <td>未追跡ファイルも含めて作業中の変更を退避</td>
+                            </tr>
+                            <tr>
+                                <td>退避復元</td>
+                                <td><code>git stash pop</code></td>
+                                <td>退避した最新の作業を復元してスタッシュから削除</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- Bottom Return / Next Banners -->
+                    <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 2.5rem;">
+                        <a href="git_basic_usage.html" class="link-banner" style="flex: 1; min-width: 260px; margin: 0;">
+                            <div class="link-banner-content">
+                                <h4>&larr; GitHub / Git 基本操作</h4>
+                                <p>commit/push、ブランチ運用の基本</p>
+                            </div>
+                            <span class="link-banner-arrow">&rarr;</span>
+                        </a>
+                        <a href="github_issue_pr.html" class="link-banner" style="flex: 1; min-width: 260px; margin: 0;">
+                            <div class="link-banner-content">
+                                <h4>Issue &amp; Pull Request 運用 &rarr;</h4>
+                                <p>PR作成、コードレビュー、Squashマージ、gh CLI</p>
+                            </div>
+                            <span class="link-banner-arrow">&rarr;</span>
+                        </a>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Dev Manuals Archive. Built for GitHub Pages.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

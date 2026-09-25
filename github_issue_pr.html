@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Issue & Pull Request 運用マニュアル - Dev Manuals</title>
+    <meta name="description" content="GitHubのIssue（課題管理）、Pull Request（プルリクエスト）、コードレビュー手順、マージ戦略（Squash/Rebase）、GitHub CLI (gh) によるコマンド操作を網羅した実践マニュアル。">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <a href="index.html" class="logo">DEV <span>MANUALS</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="git_basic_usage.html">GIT / GITHUB</a></li>
+                <li><a href="git_staging_patch.html">STAGING & PATCH</a></li>
+                <li><a href="github_issue_pr.html" class="active">ISSUE & PR</a></li>
+                <li><a href="antigravity_guide.html">ANTIGRAVITY IDE</a></li>
+            </ul>
+            <div class="burger" aria-label="Menu Toggle">
+                <div class="line1"></div>
+                <div class="line2"></div>
+                <div class="line3"></div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="manual-layout">
+            
+            <!-- Sidebar (TOC) -->
+            <aside class="toc-sidebar">
+                <h4>目次</h4>
+                <ul>
+                    <li><a href="#workflow">1. GitHubフロー全体像</a></li>
+                    <li><a href="#issue-guide">2. Issue (課題管理) の使い方</a></li>
+                    <li><a href="#pr-guide">3. Pull Request の作成と運用</a></li>
+                    <li><a href="#review-guide">4. コードレビューの流れ</a></li>
+                    <li><a href="#merge-strategies">5. 3つのマージ方法の比較</a></li>
+                    <li><a href="#gh-cli">6. GitHub CLI (gh) コマンド操作</a></li>
+                    <li><a href="#trouble-faq">7. よくあるトラブル & FAQ</a></li>
+                </ul>
+            </aside>
+
+            <!-- Article Body -->
+            <main class="article-content">
+                <h1>GitHub Issue & Pull Request 運用マニュアル</h1>
+                <div class="article-meta">
+                    カテゴリー: Collaboration & Workflow | 最終更新: 2026年9月25日
+                </div>
+
+                <!-- Related Links Banner -->
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin: 1.5rem 0 2rem;">
+                    <a href="git_basic_usage.html" class="link-banner" style="flex: 1; min-width: 260px; margin: 0;">
+                        <div class="link-banner-content">
+                            <h4>&larr; Git 基本操作マニュアル</h4>
+                            <p>clone, branch, push 等の基本操作</p>
+                        </div>
+                        <span class="link-banner-arrow">&rarr;</span>
+                    </a>
+                    <a href="git_staging_patch.html" class="link-banner" style="flex: 1; min-width: 260px; margin: 0;">
+                        <div class="link-banner-content">
+                            <h4>ステージング & パッチ詳細 &rarr;</h4>
+                            <p>.gitignore, git add -p, .patch 運用</p>
+                        </div>
+                        <span class="link-banner-arrow">&rarr;</span>
+                    </a>
+                </div>
+
+                <p>個人開発からチーム開発まで、GitHubを活用した現代のソフトウェア開発の中心となるのが<strong>「Issue（課題・タスク）」</strong>と<strong>「Pull Request（マージリクエスト・コードレビュー）」</strong>です。</p>
+                <p>本マニュアルでは、タスク起案からブランチ作成、PR提出、レビュー対応、マージ戦略、そしてターミナルから素早く操作できる <strong>GitHub CLI (<code>gh</code>)</strong> の活用までを体系的に解説します。</p>
+
+                <!-- SECTION 1 -->
+                <section id="workflow">
+                    <h2>1. GitHubフロー（開発サイクル）の全体像</h2>
+                    <p>GitHubを用いた標準的な開発サイクルは、以下のステップで一本の線のように進みます。</p>
+
+                    <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px; padding: 1.5rem; margin: 1.5rem 0;">
+                        <ol style="margin-left: 1.2rem; margin-bottom: 0;">
+                            <li style="margin-bottom: 0.8rem;">
+                                <strong>Issue の作成:</strong> バグ報告や新機能要望をIssueとして起案し、要件とゴールを明確化。
+                            </li>
+                            <li style="margin-bottom: 0.8rem;">
+                                <strong>作業ブランチの作成:</strong> <code>main</code> からトピックブランチ（例: <code>feat/user-auth</code>）を切って作業。
+                            </li>
+                            <li style="margin-bottom: 0.8rem;">
+                                <strong>コミット &amp; リモートへプッシュ:</strong> 実装を進め、GitHub上のリモートブランチへ送信。
+                            </li>
+                            <li style="margin-bottom: 0.8rem;">
+                                <strong>Pull Request (PR) の作成:</strong> 変更内容や背景、関連Issue番号（<code>Closes #12</code>）を記載してPRを作成。
+                            </li>
+                            <li style="margin-bottom: 0.8rem;">
+                                <strong>レビュー &amp; 修正コミット:</strong> CI（自動テスト）の通過確認と、レビュアーによるコードレビュー・指摘対応。
+                            </li>
+                            <li>
+                                <strong>マージ &amp; Issue自動クローズ:</strong> レビュー承認（Approve）後に <code>main</code> へマージし、ブランチを削除。
+                            </li>
+                        </ol>
+                    </div>
+
+                    <h3>なぜ直接 main にコミットせず、Issue &amp; PR を使うのか？</h3>
+                    <ul>
+                        <li><strong>タスクの見える化:</strong> 何を作るのか、なぜ必要なのかが Issue 上で議論・記録され、後から経緯を追跡できます。</li>
+                        <li><strong>品質担保 (レビュー &amp; CI):</strong> 自動テストと第三者による確認を経てから本番コード（main）に合流するため、デグレを防げます。</li>
+                        <li><strong>競合の防止:</strong> 機能ごとに独立したブランチで作業するため、複数人が同時に別機能を安全に開発できます。</li>
+                    </ul>
+                </section>
+
+                <!-- SECTION 2 -->
+                <section id="issue-guide">
+                    <h2>2. Issue (課題管理) の使い方</h2>
+                    <p><strong>Issue</strong> は、バグ報告・新機能の提案・リファクタリング計画・質問などを記録・追跡するチケット機能です。</p>
+
+                    <h3>Issue に設定できる主要メタデータ</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>項目</th>
+                                <th>説明</th>
+                                <th>活用のポイント</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Assignees</strong></td>
+                                <td>そのIssueの担当作業者</td>
+                                <td>誰が作業中かを一目でわかるように設定する</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Labels</strong></td>
+                                <td>カテゴリや優先度のタグ</td>
+                                <td><code>bug</code>, <code>enhancement</code>, <code>documentation</code>, <code>good first issue</code> など</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Milestones</strong></td>
+                                <td>リリース時期やイテレーション目標</td>
+                                <td>例: <code>v1.2.0 リリース</code>, <code>2026-Q3 スプリント</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Projects</strong></td>
+                                <td>カンバンボード（進行状況）</td>
+                                <td>Todo &rarr; In Progress &rarr; Done の進捗管理</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <h3>良いIssueを書くためのテンプレート例</h3>
+<pre><code>## 概要
+ユーザーログイン画面にて、Googleアカウント連携ボタンを押した際に403エラーが発生する。
+
+## 再現手順
+1. `/login` 画面にアクセス
+2. 「Googleでログイン」ボタンをクリック
+3. 認証同意画面の直後に403エラー画面が表示される
+
+## 期待される動作
+正常にOAuth認証が完了し、ダッシュボード画面 (`/dashboard`) にリダイレクトされること。
+
+## 動作環境 / 関連情報
+- OS: macOS 15.0 / Chrome 128
+- staging環境で再現確認済み</code></pre>
+
+                    <div class="callout">
+                        <p><strong>Issue番号（#番号）の自動リンク:</strong><br>
+                        GitHub上では <code>#123</code> のようにシャープ記号の後に番号を書くだけで、自動的に対象のIssueやPRへのハイパーリンクになります。コミットメッセージやPR説明欄、チャットで積極的に引用しましょう。</p>
+                    </div>
+                </section>
+
+                <!-- SECTION 3 -->
+                <section id="pr-guide">
+                    <h2>3. Pull Request (PR) の作成と運用</h2>
+                    <p><strong>Pull Request (PR)</strong> は、「自分が作業したブランチの変更内容を、本体ブランチ（通常は <code>main</code>）に取り込んで（Pull して）ほしい」とリクエストする機能です。</p>
+
+                    <h3>PR作成の流れ</h3>
+<pre><code># 1. 最新のmainから作業ブランチを作成
+git switch -c feat/login-google
+
+# 2. 開発作業とコミット
+git add .
+git commit -m "fix: Google OAuth認証のスコープ設定を修正"
+
+# 3. リモートへプッシュ（初めてのブランチの場合は -u origin <ブランチ名>）
+git push -u origin feat/login-google</code></pre>
+
+                    <p>プッシュ後、GitHubのリポジトリトップ画面を開くと、上部に黄色いバーで <strong>「Compare &amp; pull request」</strong> ボタンが表示されます。ここをクリックして作成画面に進みます。</p>
+
+                    <h3>PRの書き方テンプレート（実務推奨）</h3>
+<pre><code>## 関連するIssue
+Closes #42
+
+## 変更内容の概要
+Google OAuth認証においてリクエストスコープの指定が不足していたため、403エラーが発生していた不具合を修正しました。
+
+## 実装の詳細・変更点
+- `src/auth/google.ts`: 認可スコープに `profile` と `email` を明示
+- `tests/auth.test.ts`: 正常系の認可リダイレクト検証テストを追加
+
+## 動作確認手順
+1. `npm run dev` でローカル起動
+2. `/login` から「Googleでログイン」をクリック
+3. テスト用Googleアカウントで認証し、`/dashboard` に遷移することを確認
+
+## レビュアーへの特記事項
+UIの変更はなく、内部ロジックのパラメータ修正のみです。</code></pre>
+
+                    <div class="callout">
+                        <p><strong>自動クローズキーワード (Closing Keywords):</strong><br>
+                        PRの説明文に <code>Closes #42</code>、<code>Fixes #42</code>、<code>Resolves #42</code> と記載しておくと、<strong>PRがmainにマージされた瞬間に、指定したIssueが自動的にクローズ</strong>されます。手動でIssueを閉じる手間が省けるため必須のテクニックです。</p>
+                    </div>
+
+                    <h3>Draft PR（下書きPR）の活用</h3>
+                    <p>PR作成ボタンの右側にある矢印から <strong>「Create Draft Pull Request」</strong> を選択すると、まだレビュー依頼前の「作業中」の状態でPRを作成できます。</p>
+                    <ul>
+                        <li>CI（自動ビルド・テスト）が走るため、プッシュするたびに問題がないかセルフチェックできる</li>
+                        <li>途中の差分をチームメンバーに見せて「この方針で進めてよいか」早期フィードバックをもらえる</li>
+                        <li>誤って途中でマージされるのを防止できる（Draft中はマージボタンが無効化される）</li>
+                    </ul>
+                </section>
+
+                <!-- SECTION 4 -->
+                <section id="review-guide">
+                    <h2>4. コードレビューの流れ</h2>
+                    <p>PRが作成されたら、レビュアー（他の開発者）によるコードレビューが行われます。</p>
+
+                    <h3>1. レビュアーの操作 (Files changed タブ)</h3>
+                    <ul>
+                        <li><strong>行コメント:</strong> 差分行の左端にある青い <code>+</code> ボタンを押して、特定の行に対して直接コメントを記入できます。</li>
+                        <li><strong>Start a review:</strong> 複数行にコメントを書き留め、最後にまとめて提出できます。</li>
+                        <li><strong>Review changes（レビュー提出）:</strong> 画面右上の緑色ボタンから3つの判定を選択して提出します。
+                            <ul>
+                                <li><strong>Comment:</strong> 承認・却下の判断は下さず、質問やメモだけを送る</li>
+                                <li><strong>Approve:</strong> 変更を承認する（マージ可能）</li>
+                                <li><strong>Request changes:</strong> 修正が必要な点を指摘し、修正が完了するまでマージをブロックする</li>
+                            </ul>
+                        </li>
+                    </ul>
+
+                    <h3>2. レビュー指摘への対応手順（作成者側）</h3>
+                    <p>指摘を受けた場合、PRを新しく作り直す必要はありません。ローカルで修正コミットを行い、同じブランチにプッシュするだけで、PR内の差分が自動更新されます。</p>
+<pre><code># 1. 作業ブランチで指摘箇所を修正
+git add src/auth/google.ts
+git commit -m "refactor: レビュー指摘に基づきOAuthエラーハンドリングを改善"
+
+# 2. プッシュ（PRが自動的に最新化されます）
+git push origin feat/login-google</code></pre>
+                    <p>修正プッシュ後、GitHub上のコメント欄で <strong>「Resolve conversation（会話を解決）」</strong> ボタンを押し、対応完了をレビュアーに報告します。</p>
+
+                    <h3>レビューコメントの慣用句（Tips）</h3>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>表現</th>
+                                <th>意味</th>
+                                <th>使い方</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>LGTM</strong></td>
+                                <td>Looks Good To Me (問題ありません)</td>
+                                <td>Approve時に承認コメントとして添える</td>
+                            </tr>
+                            <tr>
+                                <td><strong>nits (nitpick)</strong></td>
+                                <td>些細な指摘（修正しなくても承認可）</td>
+                                <td>タイポやインデント等の軽微なアドバイスに付ける</td>
+                            </tr>
+                            <tr>
+                                <td><strong>IMO / IMHO</strong></td>
+                                <td>In My (Humble) Opinion (私見ですが)</td>
+                                <td>別のアプローチを提案する際の柔らかい言い回し</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- SECTION 5 -->
+                <section id="merge-strategies">
+                    <h2>5. 3つのマージ方法の比較</h2>
+                    <p>PRの承認後、GitHubのマージボタンには3つの方式があります。プロジェクトの方針に応じて使い分けます。</p>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>マージ方式</th>
+                                <th>コミット履歴の挙動</th>
+                                <th>メリット・デメリット</th>
+                                <th>おすすめの用途</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Create a merge commit</strong><br>(通常マージ)</td>
+                                <td>ブランチ内の全コミットをそのまま残し、マージコミットを1つ作成</td>
+                                <td>&plus; 作業ブランチでの詳細なコミット履歴がすべて残る<br>&minus; 履歴のグラフが枝分かれして複雑になりやすい</td>
+                                <td>大規模リリースやGitFlow運用</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Squash and merge</strong><br>(スカッシュマージ)</td>
+                                <td>ブランチ内の複数のコミットを<strong>1つのコミットに圧縮</strong>してmainに追加</td>
+                                <td>&plus; mainの履歴が「1 PR = 1 コミット」となり非常に綺麗で見やすい<br>&plus; 細かい作業コミットや「typo修正」などが残らない</td>
+                                <td><strong>一般的なWeb開発・GitHubフロー（最も推奨）</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Rebase and merge</strong><br>(リベースマージ)</td>
+                                <td>ブランチのコミットをmainの先端に直線状に付け替える（マージコミットなし）</td>
+                                <td>&plus; 履歴が完全な一本線になる<br>&minus; コミットIDがすべて書き換わるため追跡がやや難解</td>
+                                <td>一本線のフラットな履歴を厳格に維持したい場合</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="callout">
+                        <p><strong>マージ後のローカル同期とブランチ削除:</strong><br>
+                        PRマージ後、GitHub上の「Delete branch」ボタンでリモートブランチを削除し、ローカルPCも最新のmainに同期しておきましょう。</p>
+<pre><code># main に切り替えて最新を取得
+git switch main
+git pull origin main
+
+# 作業完了したローカルブランチを削除
+git branch -d feat/login-google
+
+# リモートで削除されたブランチの追跡情報を整理
+git fetch --prune</code></pre>
+                    </div>
+                </section>
+
+                <!-- SECTION 6 -->
+                <section id="gh-cli">
+                    <h2>6. GitHub CLI (gh) によるコマンド操作</h2>
+                    <p><strong>GitHub CLI (<code>gh</code>)</strong> は、ブラウザを開かずにターミナルから直接IssueやPRの作成、一覧確認、レビュー、マージを実行できる公式ツールです。</p>
+
+                    <h3>初期ログイン</h3>
+<pre><code># ブラウザまたはトークンでGitHubに認証ログイン
+gh auth login
+
+# ログイン状態の確認
+gh auth status</code></pre>
+
+                    <h3>Issue操作コマンド</h3>
+<pre><code># 対話式で新しいIssueを作成する（タイトル・本文・ラベル等を入力）
+gh issue create
+
+# コマンドライン引数で一発作成
+gh issue create --title "ログインボタンのスタイル崩れ" --body "Chromeで幅が狭いときに崩れる" --label "bug"
+
+# 現在開いているIssueの一覧を表示
+gh issue list
+
+# 特定のIssueをブラウザで開く
+gh issue view 42 --web</code></pre>
+
+                    <h3>Pull Request 操作コマンド</h3>
+<pre><code># 現在のブランチから対話式でPRを作成
+gh pr create
+
+# コマンドライン引数で一発作成（自動でプッシュも実行されます）
+gh pr create --title "fix: Googleログイン認証修正" --body "Closes #42" --base main
+
+# 下書き（Draft）PRを作成
+gh pr create --draft
+
+# オープン中のPR一覧を表示
+gh pr list
+
+# チームメンバーが作成したPRブランチをローカルにチェックアウトして検証
+gh pr checkout 45
+
+# 現在のPRの差分を確認
+gh pr diff
+
+# ターミナルからPRをマージ（スカッシュマージしてブランチ削除）
+gh pr merge --squash --delete-branch</code></pre>
+                </section>
+
+                <!-- SECTION 7 -->
+                <section id="trouble-faq">
+                    <h2>7. よくあるトラブル &amp; FAQ</h2>
+
+                    <h3>Q1. PR上に「This branch has conflicts that must be resolved」と表示された</h3>
+                    <p>自分が作業している間に、他の人が <code>main</code> を更新して同じファイルの同じ行を変更したため、競合（コンフリクト）が発生しています。</p>
+<pre><code># 1. ローカルの作業ブランチに切り替える
+git switch feat/my-branch
+
+# 2. 最新の main を作業ブランチに取り込む（マージまたはリベース）
+git fetch origin
+git merge origin/main
+
+# 3. コンフリクトしたファイルをエディタで開き、競合マーカー (<<<<<<<, =======, >>>>>>>) を解消して保存
+# 4. 解決したファイルをステージングしてコミット
+git add .
+git commit -m "fix: mainブランチとの競合を解消"
+
+# 5. プッシュするとPRの競合表示が自動的に解消されます
+git push origin feat/my-branch</code></pre>
+
+                    <h3>Q2. レビュー前にPRの対象先（ベースブランチ）を間違えてしまった</h3>
+                    <p>PRタイトルの下にある <strong>「Edit」</strong> ボタンを押すと、ベースブランチ（例: <code>develop</code> &rarr; <code>main</code>）を後から変更できます。PRを作り直す必要はありません。</p>
+
+                    <h3>Q3. マージした直後に重大なバグが発覚した</h3>
+                    <p>マージ済みのPR画面の下部に <strong>「Revert」</strong> ボタンが表示されています。これを押すと、そのPRの変更を完全に打ち消す新しいPRが自動作成されるため、迅速かつ安全にロールバックできます。</p>
+                </section>
+
+                <!-- Next Guides Navigation -->
+                <div style="margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--border-color);">
+                    <h4>関連マニュアル一覧</h4>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; margin-top: 1rem;">
+                        <a href="git_basic_usage.html" class="manual-card" style="padding: 1.2rem;">
+                            <span class="tag">Basic</span>
+                            <h4 style="margin: 0.3rem 0; font-size: 1.05rem;">Git 基本操作</h4>
+                            <p style="font-size: 0.85rem; margin-bottom: 0.8rem;">リポジトリ作成から日常のcommit/push、ブランチ運用の基本</p>
+                            <span style="font-size: 0.82rem; color: var(--accent-strong); font-weight: 500;">閲覧する &rarr;</span>
+                        </a>
+                        <a href="git_staging_patch.html" class="manual-card" style="padding: 1.2rem;">
+                            <span class="tag">Advanced</span>
+                            <h4 style="margin: 0.3rem 0; font-size: 1.05rem;">ステージング &amp; パッチ</h4>
+                            <p style="font-size: 0.85rem; margin-bottom: 0.8rem;">.gitignore、部分コミット (git add -p)、差分パッチ(.patch)運用</p>
+                            <span style="font-size: 0.82rem; color: var(--accent-strong); font-weight: 500;">閲覧する &rarr;</span>
+                        </a>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Dev Manuals Archive. Built for GitHub Pages.</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

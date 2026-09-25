@@ -20,6 +20,8 @@
             <ul class="nav-links">
                 <li><a href="index.html">HOME</a></li>
                 <li><a href="git_basic_usage.html" class="active">GIT / GITHUB</a></li>
+                <li><a href="git_staging_patch.html">STAGING & PATCH</a></li>
+                <li><a href="github_issue_pr.html">ISSUE & PR</a></li>
                 <li><a href="antigravity_guide.html">ANTIGRAVITY IDE</a></li>
             </ul>
             <div class="burger" aria-label="Menu Toggle">
@@ -43,6 +45,7 @@
                     <li><a href="#daily-flow">3. 日常のコマンド例</a></li>
                     <li><a href="#branch-ops">4. ブランチ操作コマンド例</a></li>
                     <li><a href="#trouble">5. トラブル解決コマンド例</a></li>
+                    <li><a href="#advanced-guide">6. 発展マニュアル (ステージング &amp; PR)</a></li>
                 </ul>
             </aside>
 
@@ -92,6 +95,15 @@ git add path/to/file.html
 # 変更または新規作成されたすべてのファイルを一括でステージング
 git add .</code></pre>
 
+                    <!-- Advanced Staging Banner Link -->
+                    <a href="git_staging_patch.html" class="link-banner">
+                        <div class="link-banner-content">
+                            <h4><span class="badge badge-primary">発展ガイド</span> .gitignore / 部分ステージング (git add -p) / パッチ作成</h4>
+                            <p>特定行だけの選別コミット、除外設定(.gitignore)のキャッシュクリア、差分パッチ(.patch)運用はこちら &rarr;</p>
+                        </div>
+                        <span class="link-banner-arrow">&rarr;</span>
+                    </a>
+
                     <h3>git commit <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（コミット）</span></h3>
                     <p>ステージングされた変更に対してメッセージを付け、ローカルリポジトリに履歴として記録します。</p>
 <pre><code>git commit -m "feat: 〇〇機能の追加"</code></pre>
@@ -139,6 +151,15 @@ git checkout &lt;ブランチ名&gt;
 git switch -c &lt;新しいブランチ名&gt;
 # （従来のコマンド表記）
 git checkout -b &lt;新しいブランチ名&gt;</code></pre>
+
+                    <!-- Branch to PR Link Banner -->
+                    <a href="github_issue_pr.html" class="link-banner">
+                        <div class="link-banner-content">
+                            <h4><span class="badge badge-primary">チーム開発</span> Issue &amp; Pull Request (PR) 運用ガイド</h4>
+                            <p>ブランチ作成後のPR作成、レビュー手順、Squashマージ、GitHub CLI (gh) の使い方はこちら &rarr;</p>
+                        </div>
+                        <span class="link-banner-arrow">&rarr;</span>
+                    </a>
                 </section>
 
                 <section id="trouble">
@@ -155,6 +176,35 @@ git restore --staged &lt;ファイル名&gt;
 
 # ファイルの編集内容自体を破棄して、直前のコミット時の状態に戻す（元に戻せないので注意）
 git restore &lt;ファイル名&gt;</code></pre>
+                </section>
+
+                <section id="advanced-guide">
+                    <h2>6. 発展マニュアル（ステージング・除外・パッチ・PR運用）</h2>
+                    <p>より高度なGitの活用やGitHubでのチーム開発については、以下の詳細ガイドをご覧ください。</p>
+
+                    <a href="git_staging_patch.html" class="link-banner" style="background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);">
+                        <div class="link-banner-content">
+                            <h4 style="font-size: 1.15rem; color: var(--accent-strong);">Git ステージング・除外・パッチ管理ガイド (.gitignore / git patch)</h4>
+                            <p style="margin-top: 0.4rem;">&bull; <code>.gitignore</code> の設定ルールと既追跡ファイルのキャッシュクリア (<code>git rm --cached</code>)<br>
+                            &bull; 1ファイル内の一部だけを小分けコミットする <code>git add -p</code>（対話的ステージング）<br>
+                            &bull; 3種類の <code>git diff</code>（作業ツリー / ステージ / HEAD）の使い分け<br>
+                            &bull; パッチファイル（<code>.patch</code>）の作成・ドライラン検証・適用 (<code>git apply</code> / <code>git am</code>)<br>
+                            &bull; 作業の一時退避と部分退避 (<code>git stash</code> / <code>git stash -p</code>)</p>
+                        </div>
+                        <span class="link-banner-arrow" style="font-size: 1.5rem;">&rarr;</span>
+                    </a>
+
+                    <a href="github_issue_pr.html" class="link-banner" style="background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%); margin-top: 1rem;">
+                        <div class="link-banner-content">
+                            <h4 style="font-size: 1.15rem; color: var(--accent-strong);">GitHub Issue &amp; Pull Request 運用マニュアル (Issue / PR / レビュー / gh CLI)</h4>
+                            <p style="margin-top: 0.4rem;">&bull; Issue作成・テンプレート・<code>Closes #42</code> による自動クローズ連携<br>
+                            &bull; Pull Request (PR) の書き方・Draft PR・Files changed でのレビュー対応<br>
+                            &bull; 3つのマージ戦略（通常マージ / Squash / Rebase）の比較と選択基準<br>
+                            &bull; ターミナルからPR/Issueを高速操作する GitHub CLI (<code>gh</code>) コマンド集<br>
+                            &bull; コンフリクト解消手順とRevert機能</p>
+                        </div>
+                        <span class="link-banner-arrow" style="font-size: 1.5rem;">&rarr;</span>
+                    </a>
                 </section>
             </main>
         </div>

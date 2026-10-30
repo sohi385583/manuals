@@ -257,7 +257,9 @@ section {
 .toc-sidebar {
     position: sticky;
     top: 130px;
-    height: fit-content;
+    max-height: calc(100vh - 150px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
     border-right: 1px solid var(--border-color);
     padding-right: 1.5rem;
 }

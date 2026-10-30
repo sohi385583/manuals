@@ -291,6 +291,28 @@ section {
     padding-left: 4px;
 }
 
+.toc-sidebar .toc-sub {
+    margin-top: 0.35rem;
+    margin-bottom: 0.5rem;
+    padding-left: 0.85rem;
+    border-left: 2px solid var(--border-color);
+}
+
+.toc-sidebar .toc-sub li {
+    margin-bottom: 0.25rem;
+}
+
+.toc-sidebar .toc-sub a {
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.toc-sidebar .toc-sub a:hover {
+    color: var(--accent-strong);
+}
+
 /* Article Content */
 .article-content h1 {
     font-size: 2.2rem;
@@ -318,6 +340,7 @@ section {
     font-size: 1.2rem;
     font-weight: 500;
     margin: 1.8rem 0 0.8rem;
+    scroll-margin-top: 90px;
 }
 
 .article-content p {

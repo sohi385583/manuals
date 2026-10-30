@@ -41,10 +41,36 @@
                 <h4>目次</h4>
                 <ul>
                     <li><a href="#overview">1. 概要・用語整理</a></li>
-                    <li><a href="#setup">2. リポジトリの準備</a></li>
-                    <li><a href="#daily-flow">3. 日常のコマンド例</a></li>
-                    <li><a href="#branch-ops">4. ブランチ操作コマンド例</a></li>
-                    <li><a href="#trouble">5. トラブル解決コマンド例</a></li>
+                    <li>
+                        <a href="#setup">2. リポジトリの準備</a>
+                        <ul class="toc-sub">
+                            <li><a href="#cmd-clone">git clone</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#daily-flow">3. 日常のコマンド例</a>
+                        <ul class="toc-sub">
+                            <li><a href="#cmd-status">git status</a></li>
+                            <li><a href="#cmd-add">git add</a></li>
+                            <li><a href="#cmd-commit">git commit</a></li>
+                            <li><a href="#cmd-pull">git pull</a></li>
+                            <li><a href="#cmd-push">git push</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#branch-ops">4. ブランチ操作コマンド例</a>
+                        <ul class="toc-sub">
+                            <li><a href="#cmd-branch">git branch</a></li>
+                            <li><a href="#cmd-switch">git switch / checkout</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="#trouble">5. トラブル解決コマンド例</a>
+                        <ul class="toc-sub">
+                            <li><a href="#cmd-amend">git commit --amend</a></li>
+                            <li><a href="#cmd-restore">git restore</a></li>
+                        </ul>
+                    </li>
                     <li><a href="#advanced-guide">6. 発展マニュアル (ステージング &amp; PR)</a></li>
                 </ul>
             </aside>
@@ -71,7 +97,7 @@
                 <section id="setup">
                     <h2>2. リポジトリの準備</h2>
                     
-                    <h3>git clone <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（リポジトリの複製）</span></h3>
+                    <h3 id="cmd-clone">git clone <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（リポジトリの複製）</span></h3>
                     <p>GitHub上の既存リポジトリをローカルPCにダウンロードして複製します。</p>
 <pre><code># 指定したURLのリポジトリをカレントディレクトリに複製
 git clone &lt;リポジトリのURL&gt;
@@ -83,11 +109,11 @@ git clone &lt;リポジトリのURL&gt; .</code></pre>
                 <section id="daily-flow">
                     <h2>3. 日常のコマンド例</h2>
 
-                    <h3>git status <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（状態確認）</span></h3>
+                    <h3 id="cmd-status">git status <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（状態確認）</span></h3>
                     <p>現在編集されたファイルや、新規作成されて追跡されていないファイルの状態を確認します。</p>
 <pre><code>git status</code></pre>
 
-                    <h3>git add <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（ステージング）</span></h3>
+                    <h3 id="cmd-add">git add <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（ステージング）</span></h3>
                     <p>変更したファイルのうち、コミットに含めるものを選択（ステージ）します。</p>
 <pre><code># 特定のファイルをステージング
 git add path/to/file.html
@@ -104,11 +130,11 @@ git add .</code></pre>
                         <span class="link-banner-arrow">&rarr;</span>
                     </a>
 
-                    <h3>git commit <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（コミット）</span></h3>
+                    <h3 id="cmd-commit">git commit <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（コミット）</span></h3>
                     <p>ステージングされた変更に対してメッセージを付け、ローカルリポジトリに履歴として記録します。</p>
 <pre><code>git commit -m "feat: 〇〇機能の追加"</code></pre>
 
-                    <h3>git pull <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（最新状態の取得・統合）</span></h3>
+                    <h3 id="cmd-pull">git pull <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（最新状態の取得・統合）</span></h3>
                     <p>GitHub（リモートリポジトリ）の最新状態を取得し、現在作業中のローカルブランチに自動でマージ（統合）します。</p>
 <pre><code># originリモートの指定したブランチから最新状態を取得してマージ
 git pull origin &lt;ブランチ名&gt;
@@ -116,7 +142,7 @@ git pull origin &lt;ブランチ名&gt;
 # 例: mainブランチの最新状態を取り込む
 git pull origin main</code></pre>
 
-                    <h3>git push <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（リモートへの送信）</span></h3>
+                    <h3 id="cmd-push">git push <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（リモートへの送信）</span></h3>
                     <p>ローカルリポジトリで記録したコミットを、GitHub（リモートリポジトリ）に送信して反映します。</p>
 <pre><code># 指定したブランチへ変更を送信
 git push origin &lt;ブランチ名&gt;
@@ -132,7 +158,7 @@ git push origin main</code></pre>
                 <section id="branch-ops">
                     <h2>4. ブランチ操作コマンド例</h2>
 
-                    <h3>git branch <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（ブランチの一覧・確認）</span></h3>
+                    <h3 id="cmd-branch">git branch <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（ブランチの一覧・確認）</span></h3>
                     <p>現在存在するローカルブランチおよびリモートブランチの一覧を確認します。</p>
 <pre><code># ローカルブランチの一覧を表示（現在選択されているブランチには * が付きます）
 git branch
@@ -140,7 +166,7 @@ git branch
 # リモートブランチを含むすべてのブランチを表示
 git branch -a</code></pre>
 
-                    <h3>git switch / git checkout <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（ブランチの切り替え・新規作成）</span></h3>
+                    <h3 id="cmd-switch">git switch / git checkout <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（ブランチの切り替え・新規作成）</span></h3>
                     <p>作業するブランチを切り替えます。または、新しくブランチを作成してそこに切り替えます。</p>
 <pre><code># 既存のブランチへ切り替える
 git switch &lt;ブランチ名&gt;
@@ -165,11 +191,11 @@ git checkout -b &lt;新しいブランチ名&gt;</code></pre>
                 <section id="trouble">
                     <h2>5. トラブル解決コマンド例</h2>
 
-                    <h3>git commit --amend <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（直前コミットの修正）</span></h3>
+                    <h3 id="cmd-amend">git commit --amend <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（直前コミットの修正）</span></h3>
                     <p>直前に行ったコミットのメッセージを修正します。また、ステージングされた変更を直前のコミットに追加することもできます。</p>
 <pre><code>git commit --amend -m "修正後の正しいコミットメッセージ"</code></pre>
 
-                    <h3>git restore <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（変更の取り消し）</span></h3>
+                    <h3 id="cmd-restore">git restore <span style="font-weight: 300; font-size: 0.9em; color: var(--text-muted);">（変更の取り消し）</span></h3>
                     <p>誤って変更してしまったファイルを元に戻したり、ステージングしたファイルを取り消したりします。</p>
 <pre><code># ステージングしたファイルを取り消す（ワークスペース内のファイルの編集内容は維持）
 git restore --staged &lt;ファイル名&gt;
